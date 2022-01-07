@@ -1,0 +1,93 @@
+# This is a basic workflow that is manually triggered
+name: Blue green deploy to web kubernetes cluster
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Servicename'
+        # Default value if no value is explicitly provided
+        default:  'k8deploystatus'
+        # Input has to be provided for the workflow to run
+        required: true
+env:
+  ## Sets environment variable
+  DOCKER_REGISTRY: acrweb.azurecr.io
+
+jobs:
+  build:
+      name: '👷‍♂️ Build'
+      runs-on: ubuntu-latest
+      outputs:
+        releasetag: ${{steps.buildpush.outputs.releasetag}}
+      steps:
+        - uses: Dustin-AB/.github/workflows/composite/build-push@main
+          id: buildpush
+          with:
+            service_name: ${{ github.event.inputs.name }}
+            owner: ${{ github.repository_owner }}
+            repo: ${{ github.repository }}
+            sha: ${{ github.sha }}
+            branch: ${{ github.ref }}
+            run_number: ${{ github.run_number }}
+            acr_password: ${{ secrets.ACR_PASSWORD }}
+            acr_username: ${{ secrets.ACR_USERNAME }}
+            acr_registry: ${{env.DOCKER_REGISTRY}}
+            web_app_infra_repo_token: ${{ secrets.REPO_TOKEN }}
+            CALLER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-test:
+      runs-on: ubuntu-latest
+      name: '📦 Deploy to ☸ Kubernetes test'
+      needs:
+        - build  
+      steps: 
+        - uses: Dustin-AB/.github/workflows/composite/deploy@main
+          name: '📦 Deploy to ☸ Kubernetes test'
+          id: deploy
+          with:
+            service_name: ${{ github.event.inputs.name }}
+            sha: ${{ github.sha }}
+            acr_registry: ${{env.DOCKER_REGISTRY}}
+            token: ${{ secrets.REPO_TOKEN }}
+            releasetag: ${{ needs.build.outputs.releasetag }}
+            deployenvironment: "test"
+
+  release-test:
+      runs-on: ubuntu-latest
+      name: '🚀 Release to ☸ Kubernetes test'
+      environment: 'web-test-release'
+      needs:
+        - build  
+        - deploy-test
+      steps: 
+        - uses: Dustin-AB/.github/workflows/composite/swapimage@main
+          name: '🚀 Release to ☸ Kubernetes test'
+          id: deploy
+          with:
+            service_name: ${{ github.event.inputs.name }}
+            sha: ${{ github.sha }}
+            token: ${{ secrets.REPO_TOKEN }}
+            deployenvironment: "test"
+
+  rollback-release-test:
+    runs-on: ubuntu-latest
+    name: '♻️ 🙈 Rollback in Kubernetes test'
+    environment: 'web-rollback-release'
+    needs: 
+      - build
+      - deploy-test
+      - release-test
+    steps: 
+      - uses: Dustin-AB/.github/workflows/composite/swapimage@main
+        name: '🚀 Release to ☸ Kubernetes test'
+        id: deploy
+        with:
+          service_name: ${{ github.event.inputs.name }}
+          sha: ${{ github.sha }}
+          token: ${{ secrets.REPO_TOKEN }}
+          deployenvironment: "test"

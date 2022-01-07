@@ -1,0 +1,8 @@
+{
+    "name": "Web Blue/green deploy Organization starter Workflow",
+    "description": "Web blue/green deploy  Organization  starter workflow. For web with kubernetes cluster",
+    "iconName": "blue-green",
+    "categories": [
+        "Docker","Web"
+    ]
+}

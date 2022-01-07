@@ -1,0 +1,31 @@
+name: "Create the release tag"
+description: "Creates a relase tag for the docker image"
+inputs:
+   owner:
+     required: true
+     description: "Caller context.repo.owner"
+   repo:
+     required: true
+     description: "Caller context.repo.repo "
+   sha:
+     required: false
+     description: "Caller context.sha "
+   CALLER_GITHUB_TOKEN:
+     required: true
+     description: 'Calling repo gitub token'
+    
+runs:
+  using: "composite"
+  steps:
+      - uses: actions/github-script@0.3.0
+        id: author-date
+        with:
+          github-token: ${{input.CALLER_GITHUB_TOKEN}}
+          script: |
+            const commit_details = await github.git.getCommit({owner: input.owner, repo: input.repo, commit_sha: input.sha});
+            return commit_details.data.author.date
+      
+      - run: echo $COMMITTED_AT
+        shell: bash
+        env:
+          COMMITTED_AT: ${{ steps.author-date.outputs.result }}

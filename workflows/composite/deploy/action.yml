@@ -1,0 +1,54 @@
+name: '📦 Deploy to ☸ Kubernetes'
+description: "Deploys to kubernetes"
+
+inputs:
+  service_name:
+    description: 'Name of the service to deploy'
+    required: true
+  sha:
+    required: true
+    description: "Caller github.sha "
+  acr_registry:
+      required: false
+      description: "Acr registry url"
+      default: "acrweb.azurecr.io"
+  releasetag:
+    required: true  
+    description: "Releasetag for the deployment"
+  token:
+    required: true
+    description: "PAT Secret token to use for updating repos"
+  deployenvironment:
+    required: true
+    description: "Environment to deploy to"
+    default: 'test'
+
+
+
+runs:  
+  using: "composite"
+  steps:
+    - name: Setup Kustomize 
+      uses: imranismail/setup-kustomize@v1
+      with:
+        kustomize-version: 3.8.6
+
+    - name: Clone stuff
+      shell: bash
+      env:
+        REPO_TOKEN: ${{inputs.token}}
+      run: | 
+        git clone https://${REPO_TOKEN}@github.com/Dustin-AB/web-app-infra.git .
+
+    - name: Update Image
+      shell: bash
+      working-directory: ./apps/${{ inputs.service_name }}/overlays/${{inputs.deployenvironment}}
+      run: | 
+        echo "RELEASE_TAG ${{inputs.releasetag}}"
+        deploy_slot="$(grep -w ./patch-service-pre-label.yaml -e 'value' | awk '{print }')"
+        kustomize edit set image ${{ inputs.acr_registry }}/${{ inputs.service_name }}:"${deploy_slot}"=:${{inputs.releasetag}}
+        git add .
+        git config user.email "$EMAIL"
+        git config user.name "$GITHUB_ACTOR"
+        git commit -m ":package: Update test image with new deploy ${{ inputs.service_name }} sha: ${{ inputs.sha }}"
+        git push

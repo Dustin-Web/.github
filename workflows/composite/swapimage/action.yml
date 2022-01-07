@@ -1,0 +1,46 @@
+name: ' ♻️ Swap image'
+description: "Swaps where production service and pre service points to"
+
+inputs:
+  service_name:
+    description: 'Name of the service to deploy'
+    required: true
+  sha:
+    required: true
+    description: "Caller github.sha "    
+  token:
+    required: true
+    description: "PAT Secret token to use for updating repos"
+  deployenvironment:
+    required: true
+    description: "Environment to deploy to"
+    default: 'test'
+
+runs:
+  using: "composite"
+  steps:
+      - name: Setup Kustomize 
+        uses: imranismail/setup-kustomize@v1
+        with:
+          kustomize-version: 3.8.6
+
+      - name: Clone stuff
+        shell: bash
+        env:
+          REPO_TOKEN: ${{inputs.token}}
+        run: | 
+          git clone https://${REPO_TOKEN}@github.com/Dustin-AB/web-app-infra.git .
+
+      - name:  Swap image
+        shell: bash
+        working-directory: ./apps/${{ inputs.service_name }}/overlays/${{inputs.deployenvironment}}
+        run: | 
+          #Swap the files
+          mv patch-service-label.yaml patch-service-label.yaml._tmp \
+          && mv patch-service-pre-label.yaml patch-service-label.yaml \
+          && mv patch-service-label.yaml._tmp patch-service-pre-label.yaml
+          git add .
+          git config user.email "$EMAIL"
+          git config user.name "$GITHUB_ACTOR"
+          git commit -m ":rocket: Swap deployments for test ${{ inputs.service_name }} sha: ${{ inputs.sha }}"
+          git push
