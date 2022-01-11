@@ -30,13 +30,10 @@ inputs:
   acr_password:
     required: true  
     description: "Acr password for login to azure registry"
-  web_app_infra_repo_token:
+  token:
     required: true
     description: "PAT Secret token to use for updating repos"
-  CALLER_GITHUB_TOKEN:
-    required: true
-    description: "Calling repository github tokern"
-
+  
 outputs:
    releasetag: 
       description: "Create release tag from date and build number"
@@ -50,7 +47,7 @@ runs:
       uses: actions/checkout@v2
       with:
         repository: ${{ inputs.repo }}
-        token: ${{ inputs.CALLER_GITHUB_TOKEN }} # `GH_PAT` is a secret that contains your PAT
+        token: ${{ inputs.token }} # `GH_PAT` is a secret that contains your PAT
       # Setup som github variables 
     - name: Declare github repository variables
       id: vars
@@ -72,14 +69,14 @@ runs:
       run: |
         git config user.email "$EMAIL"
         git config user.name "$GITHUB_ACTOR"
-        git remote set-url origin https://x-access-token:${{ inputs.web_app_infra_repo_token }}@github.com/${{ inputs.repo }}
+        git remote set-url origin https://x-access-token:${{ inputs.token }}@github.com/${{ inputs.repo }}
         git checkout "${GITHUB_REF:11}"
         git tag ${{steps.vars.outputs.releasetag}}
 
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ inputs.web_app_infra_repo_token }}
+        github_token: ${{ inputs.token }}
         tags: true
         # branch: ${{ github.ref }}
 
