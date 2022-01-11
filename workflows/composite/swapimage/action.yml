@@ -29,7 +29,7 @@ runs:
         env:
           REPO_TOKEN: ${{inputs.token}}
         run: | 
-          git clone https://${REPO_TOKEN}@github.com/Dustin-AB/web-app-infra.git .
+          git clone https://${REPO_TOKEN}@github.com/Dustin-Web/web-app-infra.git .
 
       - name:  Swap image
         shell: bash
