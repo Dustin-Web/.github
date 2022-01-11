@@ -62,7 +62,7 @@ runs:
     - uses: actions/checkout@v2
       with:
         repository: ${{ inputs.repo }}
-        token: ${{ inputs.CALLER_GITHUB_TOKEN }} # `GH_PAT` is a secret that contains your PAT
+        token: ${{ inputs.token }} # `GH_PAT` is a secret that contains your PAT
     
     - name: "Bump version"
       shell: bash
