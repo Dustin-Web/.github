@@ -114,13 +114,13 @@ jobs:
         env:
           REPO_TOKEN: ${{secrets.web_app_infra_repo_token}}
         run: | 
-          git clone https://${REPO_TOKEN}@github.com/Dustin-AB/web-app-infra.git .
+          git clone https://${REPO_TOKEN}@github.com/Dustin-Web/web-app-infra.git .
 
       - name: Update Image
         working-directory: ./apps/${{ inputs.service_name }}/overlays/test
         run: | 
           echo "RELEASE_TAG ${{needs.build.outputs.releasetag}}"
-          deploy_slot="$(grep -w ./patch-service-pre-label.yaml -e 'value' | awk '{print $2}')"
+          deploy_slot="$(grep -w ./patch-service-pre-label.yaml -e 'value' | awk '{print }')"
           kustomize edit set image ${{ inputs.acr_registry }}/${{ inputs.service_name }}:"${deploy_slot}"=:${{needs.build.outputs.releasetag}}
           git add .
           git config user.email "$EMAIL"
@@ -143,7 +143,7 @@ jobs:
         env:
           REPO_TOKEN: ${{secrets.web_app_infra_repo_token}}
         run: | 
-          git clone https://${REPO_TOKEN}@github.com/Dustin-AB/web-app-infra.git .
+          git clone https://${REPO_TOKEN}@github.com/Dustin-Web/web-app-infra.git .
 
       - name:  Swap image
         working-directory: ./apps/${{ inputs.service_name }}/overlays/test
