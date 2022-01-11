@@ -1,5 +1,5 @@
 # This is a basic workflow that is manually triggered
-name: Blue Green Caller
+name: Blue Green Deploy
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
@@ -16,7 +16,7 @@ on:
         required: true
 jobs:
   bluegreen:    
-    uses: Dustin-Web/.github/.github/workflows/bluegreendeploy.yaml@main
+    uses: Dustin-Web/.github/workflows/bluegreendeploy.yaml@main
     with:
       service_name: ${{ github.event.inputs.name }}
       owner: ${{ github.repository_owner }}
