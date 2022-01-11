@@ -1,0 +1,30 @@
+# This is a basic workflow that is manually triggered
+name: Blue Green Caller
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Servicename'
+        # Default value if no value is explicitly provided
+        default: 'servicename'
+        # Input has to be provided for the workflow to run
+        required: true
+jobs:
+  bluegreen:    
+    uses: Dustin-Web/.github/.github/workflows/bluegreendeploy.yaml@main
+    with:
+      service_name: ${{ github.event.inputs.name }}
+      owner: ${{ github.repository_owner }}
+      repo: ${{ github.repository }}
+      sha: ${{ github.sha }}
+      branch: ${{ github.ref }}
+      run_number: ${{ github.run_number }}
+    secrets:
+        acr_password: ${{ secrets.ACR_PASSWORD }}
+        acr_username: ${{ secrets.ACR_USERNAME }}
+        token: ${{ secrets.REPO_TOKEN }}
