@@ -57,7 +57,9 @@ runs:
       run: |
         echo "##[set-output name=branch;]$(echo ${{ inputs.branch }}#refs/heads/)"
         echo "::set-output name=commit_date::$(git show -s --format=%cd --date=format:%Y-%m-%d)"
-        echo "::set-output name=releasetag::$(echo release_${{ env.RELEASE_DATE }}_${{ inputs.run_number }})"
+        echo "::set-output name=releasetag::$(echo release_$(git show -s --format=%cd --date=format:%Y-%m-%d)_${{ inputs.run_number }})"
+
+        
     
     - uses: actions/checkout@v2
       with:

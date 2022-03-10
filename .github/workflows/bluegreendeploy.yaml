@@ -100,7 +100,7 @@ jobs:
   rollback-release-test:
     runs-on: ubuntu-latest
     name: '♻️ 🙈 Rollback in Kubernetes test'
-    environment: 'web-rollback-release'
+    environment: 'web-test-rollback-release'
     needs: 
       - build
       - deploy-test
