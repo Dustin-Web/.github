@@ -6,24 +6,31 @@ on:
         inputs:
           service_name:
             description: 'Name of the service to deploy'
+            type: string
             required: true
           owner:
             required: true
+            type: string
             description: "Caller github.repo.owner"
           repo:
             required: true
+            type: string
             description: "Caller github.repo "
           sha:
             required: true
+            type: string
             description: "Caller github.sha "
           branch: 
               required: true
+              type: string
               description: "branch is github.ref from caller"
           run_number: 
               required: true  
+              type: string
               description: "github.run_number from caller"       
           acr_registry:
               required: false
+              type: string
               description: "Acr registry url"
               default: "acrweb.azurecr.io"   
         secrets:
