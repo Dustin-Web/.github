@@ -21,20 +21,21 @@ on:
               description: "branch is github.ref from caller"
           run_number: 
               required: true  
-              description: "github.run_number from caller"
+              description: "github.run_number from caller"       
+        secrets:
           acr_registry:
               required: false
               description: "Acr registry url"
-              default: "acrweb.azurecr.io"
+              default: "acrweb.azurecr.io"   
           acr_username:
-            required: true
-            description: "Acr registry username"
+              required: true
+              description: "Acr registry username"
           acr_password:
-            required: true  
-            description: "Acr password for login to azure registry"
+              required: true  
+              description: "Acr password for login to azure registry"
           token:
-            required: true
-            description: "PAT Secret token to use for updating repos"
+              required: true
+              description: "PAT Secret token to use for updating repos"
   
 outputs:
    releasetag: 
