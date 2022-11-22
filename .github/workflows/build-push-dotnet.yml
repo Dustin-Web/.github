@@ -1,38 +1,40 @@
 name: ' 👷‍♂️ Build and push'
 description: "Builds and pushes an image to a registry"
 
-inputs:
-  service_name:
-    description: 'Name of the service to deploy'
-    required: true
-  owner:
-    required: true
-    description: "Caller github.repo.owner"
-  repo:
-    required: true
-    description: "Caller github.repo "
-  sha:
-    required: true
-    description: "Caller github.sha "
-  branch: 
-      required: true
-      description: "branch is github.ref from caller"
-  run_number: 
-      required: true  
-      description: "github.run_number from caller"
-  acr_registry:
-      required: false
-      description: "Acr registry url"
-      default: "acrweb.azurecr.io"
-  acr_username:
-    required: true
-    description: "Acr registry username"
-  acr_password:
-    required: true  
-    description: "Acr password for login to azure registry"
-  token:
-    required: true
-    description: "PAT Secret token to use for updating repos"
+on:
+  workflow_call:
+        inputs:
+          service_name:
+            description: 'Name of the service to deploy'
+            required: true
+          owner:
+            required: true
+            description: "Caller github.repo.owner"
+          repo:
+            required: true
+            description: "Caller github.repo "
+          sha:
+            required: true
+            description: "Caller github.sha "
+          branch: 
+              required: true
+              description: "branch is github.ref from caller"
+          run_number: 
+              required: true  
+              description: "github.run_number from caller"
+          acr_registry:
+              required: false
+              description: "Acr registry url"
+              default: "acrweb.azurecr.io"
+          acr_username:
+            required: true
+            description: "Acr registry username"
+          acr_password:
+            required: true  
+            description: "Acr password for login to azure registry"
+          token:
+            required: true
+            description: "PAT Secret token to use for updating repos"
   
 outputs:
    releasetag: 
