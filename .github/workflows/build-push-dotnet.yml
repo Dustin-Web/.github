@@ -75,11 +75,17 @@ jobs:
       - name: "Bump version"
         shell: bash
         run: |
-          git config user.email "$EMAIL"
+          echo "Release tag: ${{steps.vars.outputs.releasetag}}"
+          git config user.email "$EMAIL"          
+          echo "Run email"
           git config user.name "$GITHUB_ACTOR"
+          echo "Run username"
           git remote set-url origin https://x-access-token:${{ secrets.token }}@github.com/${{ inputs.repo }}
+          echo "Run set remote"
           git checkout "${GITHUB_REF:11}"
+          echo "Run github ref"
           git tag ${{steps.vars.outputs.releasetag}}
+          echo "Run tag"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
