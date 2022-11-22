@@ -92,8 +92,8 @@ jobs:
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
           registry: ${{ inputs.acr_registry }}
-          username: ${{ inputs.acr_username }}
-          password: ${{ inputs.acr_password }}
+          username: ${{ secrets.acr_username }}
+          password: ${{ secrets.acr_password }}
 
       - name: Install .NET 7 SDK
         uses: actions/setup-dotnet@v3.0.3
