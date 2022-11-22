@@ -1,0 +1,105 @@
+name: ' 👷‍♂️ Build and push'
+description: "Builds and pushes an image to a registry"
+
+inputs:
+  service_name:
+    description: 'Name of the service to deploy'
+    required: true
+  owner:
+    required: true
+    description: "Caller github.repo.owner"
+  repo:
+    required: true
+    description: "Caller github.repo "
+  sha:
+    required: true
+    description: "Caller github.sha "
+  branch: 
+      required: true
+      description: "branch is github.ref from caller"
+  run_number: 
+      required: true  
+      description: "github.run_number from caller"
+  acr_registry:
+      required: false
+      description: "Acr registry url"
+      default: "acrweb.azurecr.io"
+  acr_username:
+    required: true
+    description: "Acr registry username"
+  acr_password:
+    required: true  
+    description: "Acr password for login to azure registry"
+  token:
+    required: true
+    description: "PAT Secret token to use for updating repos"
+  
+outputs:
+   releasetag: 
+      description: "Create release tag from date and build number"
+      value: ${{steps.vars.outputs.releasetag}}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ inputs.repo }}
+        token: ${{ inputs.token }} # `GH_PAT` is a secret that contains your PAT
+      # Setup som github variables 
+    - name: Declare github repository variables
+      id: vars
+      shell: bash
+      env:
+        RELEASE_DATE: $(git show -s --format=%cd --date=format:%Y-%m-%d)
+      run: |
+        echo "##[set-output name=branch;]$(echo ${{ inputs.branch }}#refs/heads/)"
+        echo "::set-output name=commit_date::$(git show -s --format=%cd --date=format:%Y-%m-%d)"
+        echo "::set-output name=releasetag::$(echo release_$(git show -s --format=%cd --date=format:%Y-%m-%d)_${{ inputs.run_number }})"                
+    
+    - name: "Bump version"
+      shell: bash
+      run: |
+        git config user.email "$EMAIL"
+        git config user.name "$GITHUB_ACTOR"
+        git remote set-url origin https://x-access-token:${{ inputs.token }}@github.com/${{ inputs.repo }}
+        git checkout "${GITHUB_REF:11}"
+        git tag ${{steps.vars.outputs.releasetag}}
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ inputs.token }}
+        tags: true
+        # branch: ${{ github.ref }}
+
+    # Login against a Docker registry except on PR
+    # https://github.com/docker/login-action
+    - name: Log into registry ${{ inputs.acr_registry  }}
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+      with:
+        registry: ${{ inputs.acr_registry }}
+        username: ${{ inputs.acr_username }}
+        password: ${{ inputs.acr_password }}
+
+    - name: Install .NET 7 SDK
+      uses: actions/setup-dotnet@v3.0.3
+      with:
+          dotnet-version: 7.0.x
+    - name: create nuget file with secrets
+      run: |
+       dotnet nuget update source "github" --username ${{ github.repository_owner }} --password "${{secrets.PACKAGE_PAT_TOKEN}} " --store-password-in-clear-text --configfile nuget.config
+       cat nuget.config
+
+    # Build and push Docker image with Buildx (don't push on PR)
+    # https://github.com/docker/build-push-action
+    - name: Build and push Docker image
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ inputs.acr_registry }}/${{ inputs.service_name }}:${{ steps.vars.outputs.releasetag }}, ${{ inputs.acr_registry }}/${{ inputs.service_name }}:latest
+        build-args: CI_COMMIT_SHA=${{ steps.vars.outputs.sha_short }},RELEASE_TAG=${{ steps.vars.outputs.releasetag }},CI_COMMIT_MESSAGE=${{ github.event.head_commit.message }},CI_COMMIT_DATE=${{ steps.vars.outputs.commit_date }} 
