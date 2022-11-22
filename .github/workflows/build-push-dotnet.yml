@@ -72,26 +72,26 @@ jobs:
           echo "::set-output name=commit_date::$(git show -s --format=%cd --date=format:%Y-%m-%d)"
           echo "::set-output name=releasetag::$(echo release_$(git show -s --format=%cd --date=format:%Y-%m-%d)_${{ inputs.run_number }})"                
 
-      - name: "Bump version"
-        shell: bash
-        run: |
-          echo "Release tag: ${{steps.vars.outputs.releasetag}}"
-          git config user.email "$EMAIL"          
-          echo "Run email"
-          git config user.name "$GITHUB_ACTOR"
-          echo "Run username"
-          git remote set-url origin https://x-access-token:${{ secrets.token }}@github.com/${{ inputs.repo }}
-          echo "Run set remote"
-          git checkout "${GITHUB_REF:11}"
-          echo "Run github ref"
-          git tag ${{steps.vars.outputs.releasetag}}
-          echo "Run tag"
+#      - name: "Bump version"
+#        shell: bash
+#        run: |
+#          echo "Release tag: ${{steps.vars.outputs.releasetag}}"
+#          git config user.email "$EMAIL"          
+#          echo "Run email"
+#          git config user.name "$GITHUB_ACTOR"
+#          echo "Run username"
+#          git remote set-url origin https://x-access-token:${{ secrets.token }}@github.com/${{ inputs.repo }}
+#          echo "Run set remote"
+#          git checkout "${GITHUB_REF:11}"
+#          echo "Run github ref"
+#          git tag ${{steps.vars.outputs.releasetag}}
+#          echo "Run tag"
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.token }}
-          tags: true
+#      - name: Push changes
+#        uses: ad-m/github-push-action@master
+#        with:
+#          github_token: ${{ secrets.token }}
+#          tags: true
           # branch: ${{ github.ref }}
 
       # Login against a Docker registry except on PR
