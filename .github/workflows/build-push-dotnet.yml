@@ -1,5 +1,4 @@
 name: ' 👷‍♂️ Build and push dotnet'
-description: "Builds and pushes an image to a registry"
 
 on:
   workflow_call:
@@ -44,10 +43,10 @@ on:
               required: true
               description: "PAT Secret token to use for updating repos"
   
-outputs:
-   releasetag: 
-      description: "Create release tag from date and build number"
-      value: ${{steps.vars.outputs.releasetag}}
+# outputs:
+#   releasetag: 
+#      description: "Create release tag from date and build number"
+#      value: ${{steps.vars.outputs.releasetag}}
 
 jobs:
   build:
