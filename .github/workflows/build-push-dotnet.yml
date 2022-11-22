@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: ${{ inputs.repo }}
-          token: ${{ inputs.token }} # `GH_PAT` is a secret that contains your PAT
+          token: ${{ secrets.token }} # `GH_PAT` is a secret that contains your PAT
         # Setup som github variables 
       - name: Declare github repository variables
         id: vars
@@ -74,14 +74,14 @@ jobs:
         run: |
           git config user.email "$EMAIL"
           git config user.name "$GITHUB_ACTOR"
-          git remote set-url origin https://x-access-token:${{ inputs.token }}@github.com/${{ inputs.repo }}
+          git remote set-url origin https://x-access-token:${{ secrets.token }}@github.com/${{ inputs.repo }}
           git checkout "${GITHUB_REF:11}"
           git tag ${{steps.vars.outputs.releasetag}}
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ inputs.token }}
+          github_token: ${{ secrets.token }}
           tags: true
           # branch: ${{ github.ref }}
 
@@ -101,7 +101,7 @@ jobs:
             dotnet-version: 7.0.x
       - name: create nuget file with secrets
         run: |
-         dotnet nuget update source "github" --username ${{ github.repository_owner }} --password "${{secrets.PACKAGE_PAT_TOKEN}} " --store-password-in-clear-text --configfile nuget.config
+         dotnet nuget update source "github" --username ${{ github.repository_owner }} --password "${{secrets.token}} " --store-password-in-clear-text --configfile nuget.config
          cat nuget.config
 
       # Build and push Docker image with Buildx (don't push on PR)
