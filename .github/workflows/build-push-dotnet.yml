@@ -33,6 +33,9 @@ on:
               description: "Acr registry url"
               default: "acrweb.azurecr.io"   
         secrets:
+          nuget_auth_token:
+              required: true
+              description: "Nuget packaging auth token"              
           acr_username:
               required: true
               description: "Acr registry username"
@@ -101,7 +104,7 @@ jobs:
             dotnet-version: 7.0.x
       - name: create nuget file with secrets
         run: |
-         dotnet nuget update source "github" --username ${{ github.repository_owner }} --password "${{secrets.token}} " --store-password-in-clear-text --configfile nuget.config
+         dotnet nuget update source "github" --username ${{ github.repository_owner }} --password "${{secrets.nuget_auth_token}} " --store-password-in-clear-text --configfile nuget.config
          cat nuget.config
 
       # Build and push Docker image with Buildx (don't push on PR)
