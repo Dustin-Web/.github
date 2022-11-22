@@ -22,11 +22,11 @@ on:
           run_number: 
               required: true  
               description: "github.run_number from caller"       
-        secrets:
           acr_registry:
               required: false
               description: "Acr registry url"
               default: "acrweb.azurecr.io"   
+        secrets:
           acr_username:
               required: true
               description: "Acr registry username"
