@@ -164,5 +164,19 @@ jobs:
         - name: Push changes
           uses: ad-m/github-push-action@master
           with:
-            github_token: ${{ secrets.token }}
+            github_token: ${{ secrets.GITHUB_TOKEN }}
             tags: true
+        - name: dispatch
+          uses: actions/github-script@v5
+          id: dispatch        
+          with: 
+            script: |
+             github.rest.repos.createDispatchEvent({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          event_type: 'autorelease',
+                          client_payload: {
+                                  releasetag: '${{needs.build.outputs.releasetag}}',
+                                  service_name: '${{env.IMAGE_NAME}}'
+                                }
+                        });
