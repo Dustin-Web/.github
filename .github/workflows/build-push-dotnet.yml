@@ -156,6 +156,8 @@ jobs:
         - name: Tag repo production release
           run: echo tagging the release version ${{needs.build.outputs.releasetag}}
         - uses: actions/checkout@v3  
+          with:
+            token: ${{ secrets.token }}
         - uses: rickstaa/action-create-tag@v1
           with:
             tag: ${{needs.build.outputs.releasetag}}
@@ -164,7 +166,7 @@ jobs:
         - name: Push changes
           uses: ad-m/github-push-action@master
           with:
-            github_token: ${{ secrets.GITHUB_TOKEN }}
+            github_token: ${{ secrets.token }}
             tags: true
         - name: dispatch
           uses: actions/github-script@v5
